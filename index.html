@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financeiro · Austin</title>
+<style>
+  :root {
+    --navy: #0f1f3d;
+    --navy-mid: #1a3260;
+    --navy-light: #234080;
+    --gold: #c9a84c;
+    --gold-light: #e8c87a;
+    --gold-dim: #8a6e30;
+    --cream: #f8f5ef;
+    --white: #ffffff;
+    --gray-100: #f2f2f2;
+    --gray-200: #e5e5e5;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --yellow: #d97706;
+    --yellow-bg: #fef3c7;
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-main);
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* LAYOUT */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 220px;
+    background: #080f1e;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    border-right: 1px solid rgba(201,168,76,0.15);
+  }
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+  }
+  .sidebar-logo .clinic-name {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .sidebar-logo .unit {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+  }
+  .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    padding: 14px 20px 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+  .nav-item.active {
+    color: var(--gold-light);
+    background: rgba(201,168,76,0.08);
+    border-left-color: var(--gold);
+  }
+  .nav-item .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+  .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar {
+    background: var(--navy);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar-title { font-size: 16px; font-weight: 600; color: var(--white); }
+  .topbar-sub { font-size: 12px; color: var(--gray-400); margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .month-selector {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: var(--white);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--font-main);
+  }
+  .month-selector:focus { outline: 1px solid var(--gold); }
+
+  .content { flex: 1; padding: 28px 32px; }
+
+  /* CARDS */
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(201,168,76,0.2);
+  }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+
+  /* STAT CARDS */
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .stat-label { font-size: 11px; color: var(--gray-400); margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--white); font-variant-numeric: tabular-nums; }
+  .stat-value.green { color: #4ade80; }
+  .stat-value.red { color: #f87171; }
+  .stat-value.gold { color: var(--gold-light); }
+  .stat-sub { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
+  /* FORMS */
+  .form-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .form-group.w-auto { flex: 0 0 auto; }
+  .form-label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; }
+  .form-input, .form-select, .form-textarea {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 7px;
+    padding: 8px 12px;
+    color: var(--white);
+    font-size: 13px;
+    font-family: var(--font-main);
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.06);
+  }
+  .form-input::placeholder { color: rgba(255,255,255,0.2); }
+  .form-select option { background: var(--navy-mid); color: var(--white); }
+  .form-input.auto-filled { border-color: rgba(201,168,76,0.5); background: rgba(201,168,76,0.07); }
+  .form-input.error { border-color: var(--red); }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed rgba(201,168,76,0.3);
+    border-radius: 10px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(201,168,76,0.03);
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+  .upload-zone.has-file { border-color: var(--gold); border-style: solid; }
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-text { font-size: 13px; color: rgba(255,255,255,0.55); }
+  .upload-text strong { color: var(--gold); }
+  .upload-hint { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-main);
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--navy);
+  }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+  .btn-danger {
+    background: rgba(220,38,38,0.15);
+    color: #f87171;
+    border: 1px solid rgba(220,38,38,0.3);
+  }
+  .btn-danger:hover { background: rgba(220,38,38,0.25); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* DIFF BADGE */
+  .diff-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .diff-ok { background: rgba(22,163,74,0.15); color: #4ade80; border: 1px solid rgba(22,163,74,0.3); }
+  .diff-warn { background: rgba(217,119,6,0.15); color: #fbbf24; border: 1px solid rgba(217,119,6,0.3); }
+  .diff-err { background: rgba(220,38,38,0.15); color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  td {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--white);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-variant-numeric: tabular-nums;
+  }
+  tr:hover td { background: rgba(255,255,255,0.03); }
+  .td-num { text-align: right; font-variant-numeric: tabular-nums; }
+  .td-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* DRE */
+  .dre-section-header td {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding-top: 18px;
+    padding-bottom: 6px;
+  }
+  .dre-sub td { color: rgba(255,255,255,0.7); padding-left: 28px; }
+  .dre-sub-sub td { color: rgba(255,255,255,0.5); padding-left: 44px; font-size: 12px; }
+  .dre-total td { font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); }
+  .dre-margin td { font-size: 16px; font-weight: 800; border-top: 2px solid rgba(201,168,76,0.4); padding-top: 14px; }
+
+  /* ALERTS */
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .alert-warn { background: rgba(217,119,6,0.12); border: 1px solid rgba(217,119,6,0.3); color: #fbbf24; }
+  .alert-err { background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.3); color: #f87171; }
+  .alert-ok { background: rgba(22,163,74,0.12); border: 1px solid rgba(22,163,74,0.3); color: #4ade80; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0; }
+  .tab {
+    padding: 9px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.45);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .tab:hover { color: rgba(255,255,255,0.8); }
+  .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+  /* SPINNER */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* LOGIN */
+  .login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--navy);
+  }
+  .login-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px;
+    padding: 40px 48px;
+    width: 360px;
+  }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-logo .title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .login-logo .sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  .login-logo .icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* SECTION separator */
+  .section-sep {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Loading overlay */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(8,15,30,0.85);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loading-overlay.active { display: flex; }
+  .loading-text { font-size: 14px; color: var(--gold-light); }
+
+  /* Toast */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    animation: slideIn 0.25s ease;
+    max-width: 320px;
+  }
+  .toast-ok { background: #166534; color: #bbf7d0; border: 1px solid #16a34a; }
+  .toast-err { background: #7f1d1d; color: #fecaca; border: 1px solid #dc2626; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* Maristela return indicator */
+  .return-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  .return-positive { background: rgba(22,163,74,0.12); border: 1px solid rgba(22,163,74,0.3); }
+  .return-negative { background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.3); }
+  .return-neutral { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* Misc */
+  .divider { height: 1px; background: rgba(255,255,255,0.07); margin: 20px 0; }
+  .text-gold { color: var(--gold-light); }
+  .text-muted { color: var(--gray-400); }
+  .text-right { text-align: right; }
+  .flex { display: flex; align-items: center; gap: 8px; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-20 { margin-bottom: 20px; }
+  .hidden { display: none !important; }
+  .badge-pgto {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-din { background: rgba(201,168,76,0.15); color: var(--gold-light); }
+  .badge-pix { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+  .badge-cre { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .badge-deb { background: rgba(59,130,246,0.15); color: #93c5fd; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">🏥</div>
+      <div class="title">Dr. Everson</div>
+      <div class="sub">Gestão Financeira · Austin</div>
+    </div>
+    <div class="form-group mb-16">
+      <label class="form-label">Senha</label>
+      <input type="password" id="loginInput" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Entrar</button>
+    <div id="loginError" class="hidden" style="margin-top:10px;font-size:12px;color:#f87171;text-align:center">Senha incorreta</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app hidden">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="clinic-name">Dr. Everson</div>
+      <div class="unit">Unidade Austin</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Visão Geral</div>
+      <div class="nav-item active" onclick="showPage('dre')">
+        <span class="nav-icon">📊</span> DRE Mensal
+      </div>
+
+      <div class="nav-section-label">Lançamentos</div>
+      <div class="nav-item" onclick="showPage('caixa')">
+        <span class="nav-icon">💰</span> Caixa Diário
+      </div>
+      <div class="nav-item" onclick="showPage('toxicologico')">
+        <span class="nav-icon">🧪</span> Toxicológico
+      </div>
+      <div class="nav-item" onclick="showPage('medicas')">
+        <span class="nav-icon">👩‍⚕️</span> Médicas
+      </div>
+      <div class="nav-item" onclick="showPage('convenios')">
+        <span class="nav-icon">🏥</span> Convênios
+      </div>
+      <div class="nav-item" onclick="showPage('despesas')">
+        <span class="nav-icon">📋</span> Despesas
+      </div>
+      <div class="nav-item" onclick="showPage('salarios')">
+        <span class="nav-icon">👥</span> Salários
+      </div>
+
+      <div class="nav-section-label">Histórico</div>
+      <div class="nav-item" onclick="showPage('historico')">
+        <span class="nav-icon">📅</span> Caixas Lançados
+      </div>
+      <div class="nav-item" onclick="showPage('divergencias')">
+        <span class="nav-icon">⚠️</span> Divergências
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="pageTitle">DRE Mensal</div>
+        <div class="topbar-sub" id="pageSubtitle">Apuração de resultado</div>
+      </div>
+      <div class="topbar-right">
+        <select class="month-selector" id="globalMonth" onchange="onMonthChange()"></select>
+        <button class="btn btn-secondary btn-sm" onclick="doLogout()">Sair</button>
+      </div>
+    </div>
+
+    <div class="content" id="pageContent">
+      <!-- content injected here -->
+    </div>
+  </div>
+
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner" style="width:32px;height:32px;border-width:3px"></div>
+  <div class="loading-text" id="loadingText">Processando...</div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+// CONFIG — substitua com seus dados reais
+// ============================================================
+const CONFIG = {
+  SENHA: '290918',
+  SHEET_ID: '1uVmivdyYXB4bxUajm4XDcbSXbChP0VhkdvwZJKmsl98',
+  SHEET_URL: 'https://script.google.com/macros/s/AKfycbw7_KQ0EhbxO--hPe7Sxh4fbanIs_p-vfqmTPfy-vxHqhGFHi4A49_KI2mPgB0P0RI/exec',
+  PLANTAO_MARISTELA: 2400, // custo mensal do plantão dela
+  SPLIT_LETICIA: { medica: 0.8, lab: 0.2 }, // ~80/20 conforme excel
+  FUNCIONARIAS: ['Beatriz', 'Isabelle', 'Viviane', 'Rita'],
+  PASSAGENS: { 'Beatriz': 12, 'Isabelle': 19, 'Viviane': 12, 'Rita': 11 },
+  CONVENIOS: ['UNIMED', 'POSTAL SAÚDE', 'BRADESCO SAÚDE', 'APPAI', 'CAC-CEDAE', 'CAPE SAÚDE', 'SAÚDE CAIXA'],
+  CAT_FIXAS: ['Aluguel','Luz','Internet','Encargos salariais','Sindicato','Simples Nacional','Taxas prefeitura','Coleta seletiva','Monitoramento','Uber'],
+  CAT_VARIAVEIS: ['Repasse ECG','Repasse Dra. Victória','Repasse Dr. Fabiano','Convênio Everson','Contraprova - Boleto','Contraprova - Desc. na fonte','Diferença DB/Pardini','Variados'],
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  loggedIn: false,
+  currentPage: 'dre',
+  currentMonth: '',
+  data: {
+    caixa: [],
+    toxicologico: [],
+    medicas: [],
+    convenios: [],
+    despesas_diarias: [],
+    despesas_mensais: [],
+    salarios: [],
+    almoco: [],
+  }
+};
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin() {
+  const v = document.getElementById('loginInput').value;
+  if (v === CONFIG.SENHA) {
+    state.loggedIn = true;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    initApp();
+  } else {
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+function doLogout() {
+  state.loggedIn = false;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginInput').value = '';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function initApp() {
+  populateMonthSelector();
+  loadAllData().then(() => showPage('dre'));
+}
+
+function populateMonthSelector() {
+  const sel = document.getElementById('globalMonth');
+  sel.innerHTML = '';
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    if (i === 0) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  state.currentMonth = sel.value;
+}
+
+function onMonthChange() {
+  state.currentMonth = document.getElementById('globalMonth').value;
+  showPage(state.currentPage);
+}
+
+// ============================================================
+// DATA LAYER — Google Sheets via Apps Script
+// ============================================================
+async function loadAllData() {
+  showLoading('Carregando dados...');
+  return new Promise((resolve) => {
+    const callbackName = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      hideLoading();
+      resolve();
+    }, 15000);
+    window[callbackName] = (json) => {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      if (json && json.data) Object.assign(state.data, json.data);
+      hideLoading();
+      resolve();
+    };
+    script.src = CONFIG.SHEET_URL + '?action=getAll&callback=' + callbackName;
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      hideLoading();
+      resolve();
+    };
+    document.head.appendChild(script);
+  });
+}
+
+async function saveRecord(table, record) {
+  return new Promise((resolve) => {
+    const callbackName = 'save_' + Date.now();
+    const script = document.createElement('script');
+    const payload = encodeURIComponent(JSON.stringify({ action: 'save', table, record }));
+    const timeout = setTimeout(() => {
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      // save locally as fallback
+      state.data[table] = state.data[table] || [];
+      state.data[table].push({ ...record, id: Date.now() });
+      resolve(true);
+    }, 10000);
+    window[callbackName] = (json) => {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      const id = (json && json.id) ? json.id : Date.now();
+      state.data[table] = state.data[table] || [];
+      state.data[table].push({ ...record, id });
+      resolve(true);
+    };
+    script.src = CONFIG.SHEET_URL + '?callback=' + callbackName + '&payload=' + payload;
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      state.data[table] = state.data[table] || [];
+      state.data[table].push({ ...record, id: Date.now() });
+      resolve(true);
+    };
+    document.head.appendChild(script);
+  });
+}
+
+async function deleteRecord(table, id) {
+  return new Promise((resolve) => {
+    const callbackName = 'del_' + Date.now();
+    const script = document.createElement('script');
+    const payload = encodeURIComponent(JSON.stringify({ action: 'delete', table, id }));
+    const timeout = setTimeout(() => {
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      state.data[table] = (state.data[table] || []).filter(r => r.id != id);
+      resolve();
+    }, 10000);
+    window[callbackName] = () => {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      if (script.parentNode) script.remove();
+      state.data[table] = (state.data[table] || []).filter(r => r.id != id);
+      resolve();
+    };
+    script.src = CONFIG.SHEET_URL + '?callback=' + callbackName + '&payload=' + payload;
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[callbackName];
+      state.data[table] = (state.data[table] || []).filter(r => r.id != id);
+      resolve();
+    };
+    document.head.appendChild(script);
+  });
+}
+
+// ============================================================
+// CLAUDE API — extract Labol report
+// ============================================================
+async function extractLabolData(imageBase64) {
+  showLoading('Lendo relatório com IA...');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 }
+            },
+            {
+              type: 'text',
+              text: `Este é um relatório de caixa do sistema Labol de uma clínica médica brasileira.
+Extraia EXATAMENTE os seguintes valores do rodapé/totais do relatório e responda SOMENTE em JSON válido, sem markdown:
+{
+  "total_servicos": número,
+  "descontos": número,
+  "a_receber": número,
+  "dinheiro": número,
+  "pix": número,
+  "credito": número,
+  "debito": número,
+  "data": "DD/MM/AAAA"
+}
+Use 0 para campos não encontrados. Não inclua texto extra, apenas o JSON.`
+            }
+          ]
+        }]
+      })
+    });
+    const json = await res.json();
+    const text = json.content?.[0]?.text || '{}';
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    hideLoading();
+    return parsed;
+  } catch(e) {
+    hideLoading();
+    showToast('Erro ao ler imagem. Preencha manualmente.', 'err');
+    return null;
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const PAGE_META = {
+  dre: { title: 'DRE Mensal', sub: 'Apuração de resultado' },
+  caixa: { title: 'Caixa Diário', sub: 'Lançamento e conferência' },
+  toxicologico: { title: 'Toxicológico', sub: 'Contraprova e Labet' },
+  medicas: { title: 'Médicas', sub: 'Repasses e retorno' },
+  convenios: { title: 'Convênios', sub: 'Receitas de convênio' },
+  despesas: { title: 'Despesas', sub: 'Fixas e variáveis' },
+  salarios: { title: 'Salários', sub: 'Folha de pagamento' },
+  historico: { title: 'Caixas Lançados', sub: 'Histórico diário' },
+  divergencias: { title: 'Divergências', sub: 'Dias com diferença de caixa' },
+};
+
+function showPage(page) {
+  state.currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.getAttribute('onclick')?.includes(`'${page}'`)) el.classList.add('active');
+  });
+  const meta = PAGE_META[page] || { title: page, sub: '' };
+  document.getElementById('pageTitle').textContent = meta.title;
+  document.getElementById('pageSubtitle').textContent = meta.sub;
+  const m = state.currentMonth;
+  const renders = { dre: renderDRE, caixa: renderCaixa, toxicologico: renderToxi,
+    medicas: renderMedicas, convenios: renderConvenios, despesas: renderDespesas,
+    salarios: renderSalarios, historico: renderHistorico, divergencias: renderDivergencias };
+  const fn = renders[page];
+  if (fn) document.getElementById('pageContent').innerHTML = fn(m);
+  afterRender(page);
+}
+
+function afterRender(page) {
+  if (page === 'caixa') initCaixaHandlers();
+  if (page === 'salarios') calcDiasUteis();
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function fmt(v) {
+  if (v === undefined || v === null || v === '') return '—';
+  const n = parseFloat(v);
+  if (isNaN(n)) return v;
+  return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtR(v) { return 'R$ ' + fmt(v); }
+
+function monthLabel(ym) {
+  if (!ym) return '';
+  const [y, m] = ym.split('-');
+  const d = new Date(parseInt(y), parseInt(m)-1, 1);
+  return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
+
+function filterByMonth(arr, field, ym) {
+  if (!ym) return arr;
+  return (arr || []).filter(r => {
+    const val = String(r[field] || '');
+    // handles "2026-01", "2026-01-02", "2026-01-02T03:00:00.000Z"
+    return val.startsWith(ym);
+  });
+}
+
+function sumField(arr, field) {
+  return (arr || []).reduce((a, r) => a + (parseFloat(r[field]) || 0), 0);
+}
+
+function getDiasUteisNoMes(ym) {
+  if (!ym) return 22;
+  const [y, m] = ym.split('-').map(Number);
+  let count = 0;
+  const days = new Date(y, m, 0).getDate();
+  for (let d = 1; d <= days; d++) {
+    const dow = new Date(y, m-1, d).getDay();
+    if (dow !== 0 && dow !== 6) count++;
+  }
+  return count;
+}
+
+function badgePgto(p) {
+  const map = { 'Dinheiro':'din', 'PIX':'pix', 'Crédito':'cre','Cartão de crédito':'cre',
+    'Débito':'deb','Cartão de débito':'deb', 'Pix':'pix' };
+  const cls = map[p] || 'din';
+  return `<span class="badge-pgto badge-${cls}">${p||''}</span>`;
+}
+
+function showLoading(txt) {
+  document.getElementById('loadingText').textContent = txt || 'Processando...';
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
+
+function showToast(msg, type='ok') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ============================================================
+// PAGE: DRE
+// ============================================================
+function renderDRE(m) {
+  const caixa = filterByMonth(state.data.caixa, 'competencia', m);
+  const medicas = filterByMonth(state.data.medicas, 'competencia', m);
+  const conv = filterByMonth(state.data.convenios, 'competencia', m);
+  const desp = filterByMonth(state.data.despesas_mensais, 'competencia', m);
+  const sal = filterByMonth(state.data.salarios, 'competencia', m);
+
+  // Receitas
+  const labDin = sumField(caixa, 'blocoA_dinheiro');
+  const labPix = sumField(caixa, 'blocoA_pix');
+  const labCre = sumField(caixa, 'blocoA_credito');
+  const labDeb = sumField(caixa, 'blocoA_debito');
+  const labTotal = labDin + labPix + labCre + labDeb;
+
+  // Consultório — vem das consultas da Maristela
+  const maristela = medicas.filter(r => r.medica === 'Maristela');
+  const consDin = sumField(maristela.filter(r=>r.pgto==='Dinheiro'), 'valor_consulta');
+  const consPix = sumField(maristela.filter(r=>r.pgto==='PIX'), 'valor_consulta');
+  const consCre = sumField(maristela.filter(r=>r.pgto==='Crédito'||r.pgto==='Cartão de crédito'), 'valor_consulta');
+  const consDeb = sumField(maristela.filter(r=>r.pgto==='Débito'||r.pgto==='Cartão de débito'), 'valor_consulta');
+  const consTotal = consDin + consPix + consCre + consDeb;
+
+  // Convênios
+  const convUni = sumField(conv.filter(r=>r.convenio==='UNIMED'), 'valor');
+  const convPos = sumField(conv.filter(r=>r.convenio==='POSTAL SAÚDE'), 'valor');
+  const convBra = sumField(conv.filter(r=>r.convenio==='BRADESCO SAÚDE'), 'valor');
+  const convApp = sumField(conv.filter(r=>r.convenio==='APPAI'), 'valor');
+  const convCac = sumField(conv.filter(r=>r.convenio==='CAC-CEDAE'), 'valor');
+  const convCap = sumField(conv.filter(r=>r.convenio==='CAPE SAÚDE'), 'valor');
+  const convSau = sumField(conv.filter(r=>r.convenio==='SAÚDE CAIXA'), 'valor');
+  const convTotal = convUni+convPos+convBra+convApp+convCac+convCap+convSau;
+
+  const totalReceitas = labTotal + consTotal + convTotal;
+
+  // Despesas fixas
+  const getDesp = (cat) => sumField(desp.filter(r=>r.categoria===cat), 'valor');
+  const folha = sumField(sal, 'salario') + sumField(sal,'bonus');
+  const vt = sumField(sal, 'vt');
+  const almoco = sumField(filterByMonth(state.data.almoco,'competencia',m), 'total');
+  const aluguel = getDesp('Aluguel'), luz = getDesp('Luz'), internet = getDesp('Internet');
+  const encargos = getDesp('Encargos salariais'), sindicato = getDesp('Sindicato');
+  const simples = getDesp('Simples Nacional'), taxas = getDesp('Taxas prefeitura');
+  const coleta = getDesp('Coleta seletiva'), monit = getDesp('Monitoramento');
+  const uber = getDesp('Uber');
+  const totalFixas = aluguel+luz+internet+folha+vt+almoco+encargos+sindicato+simples+uber+taxas+coleta+monit;
+
+  // Despesas variáveis
+  const repEcg = getDesp('Repasse ECG');
+  const repLeticia = sumField(medicas.filter(r=>r.medica==='Leticia'), 'repasse_medica');
+  const repVictoria = getDesp('Repasse Dra. Victória');
+  const repFabiano = getDesp('Repasse Dr. Fabiano');
+  const repMaristela = CONFIG.PLANTAO_MARISTELA;
+  const convEv = getDesp('Convênio Everson');
+  const ctraprova = getDesp('Contraprova - Boleto');
+  const ctradesc = getDesp('Contraprova - Desc. na fonte');
+  const difPardini = getDesp('Diferença DB/Pardini');
+  const variados = getDesp('Variados');
+  const totalVariaveis = repEcg+repLeticia+repVictoria+repFabiano+repMaristela+convEv+ctraprova+ctradesc+difPardini+variados;
+
+  const totalDespesas = totalFixas + totalVariaveis;
+  const margem = totalReceitas - totalDespesas;
+  const margPct = totalReceitas > 0 ? (margem/totalReceitas*100).toFixed(1) : '0.0';
+  const margClass = margem >= 0 ? 'green' : 'red';
+
+  return `
+  <div class="grid-4 mb-16">
+    <div class="stat-card">
+      <div class="stat-label">Total Receitas</div>
+      <div class="stat-value gold">${fmtR(totalReceitas)}</div>
+      <div class="stat-sub">${monthLabel(m)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Despesas</div>
+      <div class="stat-value">${fmtR(totalDespesas)}</div>
+      <div class="stat-sub">Fixas + Variáveis</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Margem Final</div>
+      <div class="stat-value ${margClass}">${fmtR(margem)}</div>
+      <div class="stat-sub">${margPct}% da receita</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Dias com Caixa</div>
+      <div class="stat-value">${caixa.length}</div>
+      <div class="stat-sub">lançamentos no mês</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Demonstrativo de Resultado</div>
+    <div class="table-wrap">
+    <table>
+      <tr class="dre-section-header"><td colspan="2">RECEITAS</td></tr>
+
+      <tr class="dre-sub"><td>Laboratório</td><td class="td-num text-gold">${fmtR(labTotal)}</td></tr>
+      <tr class="dre-sub-sub"><td>Dinheiro</td><td class="td-num">${fmtR(labDin)}</td></tr>
+      <tr class="dre-sub-sub"><td>PIX</td><td class="td-num">${fmtR(labPix)}</td></tr>
+      <tr class="dre-sub-sub"><td>Crédito</td><td class="td-num">${fmtR(labCre)}</td></tr>
+      <tr class="dre-sub-sub"><td>Débito</td><td class="td-num">${fmtR(labDeb)}</td></tr>
+
+      <tr class="dre-sub"><td>Consultório (Dra. Maristela)</td><td class="td-num text-gold">${fmtR(consTotal)}</td></tr>
+      <tr class="dre-sub-sub"><td>Dinheiro</td><td class="td-num">${fmtR(consDin)}</td></tr>
+      <tr class="dre-sub-sub"><td>PIX</td><td class="td-num">${fmtR(consPix)}</td></tr>
+      <tr class="dre-sub-sub"><td>Crédito</td><td class="td-num">${fmtR(consCre)}</td></tr>
+      <tr class="dre-sub-sub"><td>Débito</td><td class="td-num">${fmtR(consDeb)}</td></tr>
+
+      <tr class="dre-sub"><td>Convênios</td><td class="td-num text-gold">${fmtR(convTotal)}</td></tr>
+      ${convUni?`<tr class="dre-sub-sub"><td>UNIMED</td><td class="td-num">${fmtR(convUni)}</td></tr>`:''}
+      ${convPos?`<tr class="dre-sub-sub"><td>POSTAL SAÚDE</td><td class="td-num">${fmtR(convPos)}</td></tr>`:''}
+      ${convBra?`<tr class="dre-sub-sub"><td>BRADESCO SAÚDE</td><td class="td-num">${fmtR(convBra)}</td></tr>`:''}
+      ${convApp?`<tr class="dre-sub-sub"><td>APPAI</td><td class="td-num">${fmtR(convApp)}</td></tr>`:''}
+      ${convCac?`<tr class="dre-sub-sub"><td>CAC-CEDAE</td><td class="td-num">${fmtR(convCac)}</td></tr>`:''}
+      ${convCap?`<tr class="dre-sub-sub"><td>CAPE SAÚDE</td><td class="td-num">${fmtR(convCap)}</td></tr>`:''}
+      ${convSau?`<tr class="dre-sub-sub"><td>SAÚDE CAIXA</td><td class="td-num">${fmtR(convSau)}</td></tr>`:''}
+
+      <tr class="dre-total"><td>TOTAL RECEITAS</td><td class="td-num" style="color:#4ade80">${fmtR(totalReceitas)}</td></tr>
+
+      <tr class="dre-section-header"><td colspan="2">DESPESAS FIXAS</td></tr>
+      <tr class="dre-sub"><td>Aluguel</td><td class="td-num">${fmtR(aluguel)}</td></tr>
+      <tr class="dre-sub"><td>Luz</td><td class="td-num">${fmtR(luz)}</td></tr>
+      <tr class="dre-sub"><td>Internet</td><td class="td-num">${fmtR(internet)}</td></tr>
+      <tr class="dre-sub"><td>Folha de pagamento</td><td class="td-num">${fmtR(folha)}</td></tr>
+      <tr class="dre-sub"><td>Vale Transporte</td><td class="td-num">${fmtR(vt)}</td></tr>
+      <tr class="dre-sub"><td>Almoço</td><td class="td-num">${fmtR(almoco)}</td></tr>
+      <tr class="dre-sub"><td>Encargos salariais</td><td class="td-num">${fmtR(encargos)}</td></tr>
+      <tr class="dre-sub"><td>Sindicato</td><td class="td-num">${fmtR(sindicato)}</td></tr>
+      <tr class="dre-sub"><td>Simples Nacional</td><td class="td-num">${fmtR(simples)}</td></tr>
+      <tr class="dre-sub"><td>Uber</td><td class="td-num">${fmtR(uber)}</td></tr>
+      <tr class="dre-sub"><td>Taxas prefeitura</td><td class="td-num">${fmtR(taxas)}</td></tr>
+      <tr class="dre-sub"><td>Coleta seletiva</td><td class="td-num">${fmtR(coleta)}</td></tr>
+      <tr class="dre-sub"><td>Monitoramento</td><td class="td-num">${fmtR(monit)}</td></tr>
+      <tr class="dre-total"><td>TOTAL FIXAS</td><td class="td-num" style="color:#f87171">${fmtR(totalFixas)}</td></tr>
+
+      <tr class="dre-section-header"><td colspan="2">DESPESAS VARIÁVEIS</td></tr>
+      <tr class="dre-sub"><td>Repasse ECG</td><td class="td-num">${fmtR(repEcg)}</td></tr>
+      <tr class="dre-sub"><td>Repasse Dra. Leticia</td><td class="td-num">${fmtR(repLeticia)}</td></tr>
+      <tr class="dre-sub"><td>Repasse Dra. Victória</td><td class="td-num">${fmtR(repVictoria)}</td></tr>
+      <tr class="dre-sub"><td>Repasse Dr. Fabiano</td><td class="td-num">${fmtR(repFabiano)}</td></tr>
+      <tr class="dre-sub"><td>Plantão Dra. Maristela</td><td class="td-num">${fmtR(repMaristela)}</td></tr>
+      <tr class="dre-sub"><td>Convênio Everson</td><td class="td-num">${fmtR(convEv)}</td></tr>
+      <tr class="dre-sub"><td>Contraprova - Boleto</td><td class="td-num">${fmtR(ctraprova)}</td></tr>
+      <tr class="dre-sub"><td>Contraprova - Desc. na fonte</td><td class="td-num">${fmtR(ctradesc)}</td></tr>
+      <tr class="dre-sub"><td>Diferença DB/Pardini</td><td class="td-num">${fmtR(difPardini)}</td></tr>
+      <tr class="dre-sub"><td>Variados</td><td class="td-num">${fmtR(variados)}</td></tr>
+      <tr class="dre-total"><td>TOTAL VARIÁVEIS</td><td class="td-num" style="color:#f87171">${fmtR(totalVariaveis)}</td></tr>
+
+      <tr class="dre-total"><td>TOTAL DESPESAS</td><td class="td-num" style="color:#f87171">${fmtR(totalDespesas)}</td></tr>
+
+      <tr class="dre-margin">
+        <td>MARGEM FINAL</td>
+        <td class="td-num" style="color:${margem>=0?'#4ade80':'#f87171'}">${fmtR(margem)}</td>
+      </tr>
+    </table>
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// PAGE: CAIXA
+// ============================================================
+function renderCaixa(m) {
+  return `
+  <div class="card">
+    <div class="card-title">📤 Bloco A — Relatório Sistêmico (Labol)</div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" accept="image/*,.pdf" id="labFileInput" onchange="handleLabFile(event)">
+      <div class="upload-icon">📄</div>
+      <div class="upload-text"><strong>Upload do print</strong> ou arraste aqui</div>
+      <div class="upload-hint">Print ou foto do relatório de caixa do Labol</div>
+    </div>
+    <div id="extractStatus" class="hidden" style="margin-top:10px"></div>
+    <div class="divider"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input type="date" id="cx_data" class="form-input" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Total Serviços</label>
+        <input type="number" id="cx_total" class="form-input" placeholder="0,00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descontos</label>
+        <input type="number" id="cx_desc" class="form-input" placeholder="0,00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Em Aberto</label>
+        <input type="number" id="cx_aberto" class="form-input" placeholder="0,00" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Dinheiro</label>
+        <input type="number" id="cx_din" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PIX</label>
+        <input type="number" id="cx_pix" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Crédito</label>
+        <input type="number" id="cx_cre" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Débito</label>
+        <input type="number" id="cx_deb" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ Bloco B — Conferência de Comprovantes</div>
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:14px">Máquina principal</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Dinheiro Caixa</label>
+        <input type="number" id="cb_din" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PIX</label>
+        <input type="number" id="cb_pix" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Crédito</label>
+        <input type="number" id="cb_cre" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Débito</label>
+        <input type="number" id="cb_deb" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:14px;margin-top:4px">Máquina toxicológico</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Crédito Toxi</label>
+        <input type="number" id="cb_cre_toxi" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Débito Toxi</label>
+        <input type="number" id="cb_deb_toxi" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group"></div>
+      <div class="form-group"></div>
+    </div>
+
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:14px;margin-top:4px">Saídas de caixa</div>
+    <div class="form-row">
+      ${CONFIG.FUNCIONARIAS.map(f=>`
+      <div class="form-group">
+        <label class="form-label">Almoço ${f}</label>
+        <input type="number" id="alm_${f.toLowerCase()}" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>`).join('')}
+      <div class="form-group">
+        <label class="form-label">Uber</label>
+        <input type="number" id="cb_uber" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Outras Saídas</label>
+        <input type="number" id="cb_outras" class="form-input" placeholder="0,00" step="0.01" oninput="calcDiff()">
+      </div>
+      <div class="form-group" style="flex:2">
+        <label class="form-label">Descrição das outras saídas</label>
+        <input type="text" id="cb_outras_desc" class="form-input" placeholder="Ex: compra de materiais">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="flex-between">
+      <div>
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:6px">Diferença (Sistêmico vs Comprovantes)</div>
+        <div id="diffBadge" class="diff-badge diff-ok">— R$ 0,00</div>
+      </div>
+      <div id="justificativaWrap" class="hidden" style="flex:1;margin-left:20px">
+        <div class="form-group">
+          <label class="form-label">Justificativa (obrigatória)</label>
+          <input type="text" id="cb_justificativa" class="form-input" placeholder="Explique a divergência">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;gap:10px">
+    <button class="btn btn-secondary" onclick="clearCaixa()">Limpar</button>
+    <button class="btn btn-primary" onclick="saveCaixa()">💾 Salvar Caixa</button>
+  </div>`;
+}
+
+function initCaixaHandlers() {
+  calcDiff();
+}
+
+async function handleLabFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  document.getElementById('uploadZone').classList.add('has-file');
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result.split(',')[1];
+    const data = await extractLabolData(base64);
+    if (data) {
+      const fields = {
+        cx_total: data.total_servicos, cx_desc: data.descontos,
+        cx_aberto: data.a_receber, cx_din: data.dinheiro,
+        cx_pix: data.pix, cx_cre: data.credito, cx_deb: data.debito
+      };
+      Object.entries(fields).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el && val !== undefined && val !== null) {
+          el.value = val || '';
+          el.classList.add('auto-filled');
+        }
+      });
+      if (data.data) {
+        const parts = data.data.split('/');
+        if (parts.length === 3) document.getElementById('cx_data').value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+      document.getElementById('extractStatus').innerHTML = `<div class="alert alert-ok">✅ Dados extraídos com sucesso. Confira e corrija se necessário.</div>`;
+      document.getElementById('extractStatus').classList.remove('hidden');
+      calcDiff();
+      showToast('Relatório lido com sucesso!', 'ok');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function calcDiff() {
+  const g = id => parseFloat(document.getElementById(id)?.value || 0) || 0;
+  const sistDin = g('cx_din'), sistPix = g('cx_pix'), sistCre = g('cx_cre'), sistDeb = g('cx_deb');
+  const sistTotal = sistDin + sistPix + sistCre + sistDeb;
+  const compDin = g('cb_din'), compPix = g('cb_pix');
+  const compCre = g('cb_cre') + g('cb_cre_toxi');
+  const compDeb = g('cb_deb') + g('cb_deb_toxi');
+  const almBeat = g('alm_beatriz'), almIsab = g('alm_isabelle'), almViv = g('alm_viviane'), almRita = g('alm_rita');
+  const uber = g('cb_uber'), outras = g('cb_outras');
+  const saidas = almBeat + almIsab + almViv + almRita + uber + outras;
+  const compTotal = compDin + compPix + compCre + compDeb + saidas;
+  const diff = sistTotal - compTotal;
+  const badge = document.getElementById('diffBadge');
+  const justWrap = document.getElementById('justificativaWrap');
+  const absDiff = Math.abs(diff);
+  badge.textContent = `${diff >= 0 ? '✓' : '!'} R$ ${fmt(diff)}`;
+  badge.className = 'diff-badge ' + (absDiff < 0.05 ? 'diff-ok' : absDiff <= 5 ? 'diff-warn' : 'diff-err');
+  if (absDiff > 5) justWrap.classList.remove('hidden');
+  else justWrap.classList.add('hidden');
+}
+
+function clearCaixa() {
+  ['cx_data','cx_total','cx_desc','cx_aberto','cx_din','cx_pix','cx_cre','cx_deb',
+   'cb_din','cb_pix','cb_cre','cb_deb','cb_cre_toxi','cb_deb_toxi',
+   'alm_beatriz','alm_isabelle','alm_viviane','cb_uber','cb_outras','cb_outras_desc','cb_justificativa']
+  .forEach(id => { const el = document.getElementById(id); if(el){el.value='';el.classList.remove('auto-filled');} });
+  document.getElementById('extractStatus').classList.add('hidden');
+  document.getElementById('uploadZone').classList.remove('has-file');
+  document.getElementById('justificativaWrap').classList.add('hidden');
+  calcDiff();
+}
+
+async function saveCaixa() {
+  const g = id => parseFloat(document.getElementById(id)?.value || 0) || 0;
+  const gs = id => document.getElementById(id)?.value || '';
+  const data = gs('cx_data');
+  if (!data) { showToast('Informe a data', 'err'); return; }
+  const diff = g('cx_din')+g('cx_pix')+g('cx_cre')+g('cx_deb') -
+    (g('cb_din')+g('cb_pix')+g('cb_cre')+g('cb_cre_toxi')+g('cb_deb')+g('cb_deb_toxi')+
+     g('alm_beatriz')+g('alm_isabelle')+g('alm_viviane')+g('cb_uber')+g('cb_outras'));
+  if (Math.abs(diff) > 5 && !gs('cb_justificativa')) {
+    showToast('Preencha a justificativa para a divergência', 'err'); return;
+  }
+  const record = {
+    data, competencia: data.substring(0,7),
+    blocoA_total: g('cx_total'), blocoA_desconto: g('cx_desc'), blocoA_aberto: g('cx_aberto'),
+    blocoA_dinheiro: g('cx_din'), blocoA_pix: g('cx_pix'), blocoA_credito: g('cx_cre'), blocoA_debito: g('cx_deb'),
+    blocoB_dinheiro: g('cb_din'), blocoB_pix: g('cb_pix'), blocoB_credito: g('cb_cre'), blocoB_debito: g('cb_deb'),
+    blocoB_cre_toxi: g('cb_cre_toxi'), blocoB_deb_toxi: g('cb_deb_toxi'),
+    alm_beatriz: g('alm_beatriz'), alm_isabelle: g('alm_isabelle'), alm_viviane: g('alm_viviane'), alm_rita: g('alm_rita'),
+    uber: g('cb_uber'), outras_saidas: g('cb_outras'), outras_desc: gs('cb_outras_desc'),
+    diferenca: diff, justificativa: gs('cb_justificativa'),
+    timestamp: new Date().toISOString()
+  };
+  showLoading('Salvando...');
+  await saveRecord('caixa', record);
+  // save almoco separately
+  for (const f of CONFIG.FUNCIONARIAS) {
+    const val = g(`alm_${f.toLowerCase()}`);
+    if (val > 0) {
+      await saveRecord('almoco', { data, competencia: data.substring(0,7), funcionaria: f, valor: val, total: val });
+    }
+  }
+  hideLoading();
+  showToast('Caixa salvo com sucesso!', 'ok');
+  clearCaixa();
+}
+
+// ============================================================
+// PAGE: TOXICOLÓGICO
+// ============================================================
+function renderToxi(m) {
+  const rows = filterByMonth(state.data.toxicologico, 'competencia', m);
+  const contraprova = rows.filter(r=>r.laboratorio==='Contraprova');
+  const labet = rows.filter(r=>r.laboratorio==='Labet');
+  return `
+  <div class="grid-3 mb-16">
+    <div class="stat-card">
+      <div class="stat-label">Contraprova</div>
+      <div class="stat-value">${contraprova.length} exames</div>
+      <div class="stat-sub">${fmtR(sumField(contraprova,'valor'))}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Labet</div>
+      <div class="stat-value">${labet.length} exames</div>
+      <div class="stat-sub">${fmtR(sumField(labet,'valor'))}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Arrecadado</div>
+      <div class="stat-value gold">${fmtR(sumField(rows,'valor'))}</div>
+      <div class="stat-sub">${rows.length} exames no mês</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Novo Registro</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input type="date" id="tx_data" class="form-input" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <div class="form-group" style="flex:2">
+        <label class="form-label">Nome do Paciente</label>
+        <input type="text" id="tx_nome" class="form-input" placeholder="Nome completo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Laboratório</label>
+        <select id="tx_lab" class="form-select">
+          <option>Contraprova</option>
+          <option>Labet</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pagamento</label>
+        <select id="tx_pgto" class="form-select">
+          <option>Dinheiro</option><option>PIX</option><option>Crédito</option><option>Débito</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor</label>
+        <input type="number" id="tx_valor" class="form-input" placeholder="0,00" step="0.01">
+      </div>
+      <div class="form-group w-auto" style="padding-top:20px">
+        <button class="btn btn-primary" onclick="saveToxi()">+ Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Registros do Mês</div>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Data</th><th>Paciente</th><th>Lab</th><th>Pagamento</th><th class="td-num">Valor</th><th></th></tr>
+      ${rows.length ? rows.map(r=>`
+      <tr>
+        <td>${r.data}</td>
+        <td>${r.nome||''}</td>
+        <td><span class="td-badge" style="background:rgba(201,168,76,0.15);color:var(--gold-light)">${r.laboratorio||''}</span></td>
+        <td>${badgePgto(r.pgto)}</td>
+        <td class="td-num">${fmtR(r.valor)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="delToxi(${r.id})">✕</button></td>
+      </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--gray-400);padding:20px">Nenhum registro este mês</td></tr>'}
+    </table>
+    </div>
+  </div>`;
+}
+
+async function saveToxi() {
+  const g = id => document.getElementById(id)?.value || '';
+  if (!g('tx_nome')) { showToast('Informe o nome do paciente', 'err'); return; }
+  const record = {
+    data: g('tx_data'), competencia: g('tx_data').substring(0,7),
+    nome: g('tx_nome'), laboratorio: g('tx_lab'), pgto: g('tx_pgto'),
+    valor: parseFloat(g('tx_valor'))||0, timestamp: new Date().toISOString()
+  };
+  showLoading('Salvando...');
+  await saveRecord('toxicologico', record);
+  hideLoading();
+  showToast('Registro salvo!', 'ok');
+  showPage('toxicologico');
+}
+async function delToxi(id) {
+  if (!confirm('Remover este registro?')) return;
+  await deleteRecord('toxicologico', id);
+  showPage('toxicologico');
+}
+
+// ============================================================
+// PAGE: MÉDICAS
+// ============================================================
+function renderMedicas(m) {
+  const rows = filterByMonth(state.data.medicas, 'competencia', m);
+  const leticia = rows.filter(r=>r.medica==='Leticia');
+  const maristela = rows.filter(r=>r.medica==='Maristela');
+  const recMar = sumField(maristela,'valor_consulta') + sumField(maristela,'valor_exame');
+  const diffMar = recMar - CONFIG.PLANTAO_MARISTELA;
+
+  return `
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'tabLeticia','tabMaristela')">Dra. Leticia</div>
+    <div class="tab" onclick="switchTab(this,'tabMaristela','tabLeticia')">Dra. Maristela</div>
+  </div>
+
+  <div id="tabLeticia">
+    <div class="grid-3 mb-16">
+      <div class="stat-card">
+        <div class="stat-label">Pacientes</div>
+        <div class="stat-value">${leticia.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Arrecadado</div>
+        <div class="stat-value gold">${fmtR(sumField(leticia,'valor_total'))}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Repasse Dra. Leticia</div>
+        <div class="stat-value red">${fmtR(sumField(leticia,'repasse_medica'))}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Novo Atendimento — Dra. Leticia</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" id="let_data" class="form-input" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group" style="flex:2">
+          <label class="form-label">Paciente</label>
+          <input type="text" id="let_nome" class="form-input" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor Total</label>
+          <input type="number" id="let_valor" class="form-input" placeholder="0,00" step="0.01" oninput="calcRepasseLeticia()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pagamento</label>
+          <select id="let_pgto" class="form-select">
+            <option>Dinheiro</option><option>PIX</option><option>Crédito</option><option>Débito</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="align-items:center">
+        <div class="stat-card" style="flex:1;padding:12px">
+          <div class="stat-label">Repasse Médica (${Math.round(CONFIG.SPLIT_LETICIA.medica*100)}%)</div>
+          <div class="stat-value red" id="let_repasse_display">R$ 0,00</div>
+        </div>
+        <div class="stat-card" style="flex:1;padding:12px">
+          <div class="stat-label">Repasse Lab (${Math.round(CONFIG.SPLIT_LETICIA.lab*100)}%)</div>
+          <div class="stat-value green" id="let_lab_display">R$ 0,00</div>
+        </div>
+        <div class="form-group w-auto" style="padding-top:4px">
+          <button class="btn btn-primary" onclick="saveLeticia()">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Atendimentos do Mês</div>
+      <div class="table-wrap"><table>
+        <tr><th>Data</th><th>Paciente</th><th>Pgto</th><th class="td-num">Total</th><th class="td-num">Rep. Médica</th><th class="td-num">Rep. Lab</th><th></th></tr>
+        ${leticia.length ? leticia.map(r=>`<tr>
+          <td>${r.data}</td><td>${r.nome||''}</td><td>${badgePgto(r.pgto)}</td>
+          <td class="td-num">${fmtR(r.valor_total)}</td>
+          <td class="td-num" style="color:#f87171">${fmtR(r.repasse_medica)}</td>
+          <td class="td-num" style="color:#4ade80">${fmtR(r.repasse_lab)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="delMedica(${r.id})">✕</button></td>
+        </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:20px">Nenhum atendimento</td></tr>'}
+      </table></div>
+    </div>
+  </div>
+
+  <div id="tabMaristela" class="hidden">
+    <div class="grid-3 mb-16">
+      <div class="stat-card">
+        <div class="stat-label">Consultas</div>
+        <div class="stat-value">${maristela.length}</div>
+        <div class="stat-sub">${maristela.filter(r=>r.fez_exame==='Sim').length} com exame de sangue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Receita Gerada</div>
+        <div class="stat-value gold">${fmtR(recMar)}</div>
+        <div class="stat-sub">Consultas + Exames</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Resultado s/ Plantão</div>
+        <div class="stat-value ${diffMar>=0?'green':'red'}">${fmtR(diffMar)}</div>
+        <div class="stat-sub">Plantão: ${fmtR(CONFIG.PLANTAO_MARISTELA)}</div>
+      </div>
+    </div>
+    <div class="return-indicator ${diffMar>=0?'return-positive':diffMar>-500?'return-neutral':'return-negative'}">
+      <span>${diffMar>=0?'✅ A Dra. Maristela está gerando retorno este mês':'⚠️ A Dra. Maristela ainda não cobriu o custo do plantão este mês'}</span>
+      <strong>${fmtR(Math.abs(diffMar))} ${diffMar>=0?'acima':'abaixo'} do break-even</strong>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Nova Consulta — Dra. Maristela</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" id="mar_data" class="form-input" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="form-group" style="flex:2">
+          <label class="form-label">Paciente</label>
+          <input type="text" id="mar_nome" class="form-input" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor Consulta</label>
+          <input type="number" id="mar_valor" class="form-input" placeholder="0,00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pagamento</label>
+          <select id="mar_pgto" class="form-select">
+            <option>Dinheiro</option><option>PIX</option><option>Crédito</option><option>Débito</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="align-items:center">
+        <div class="form-group">
+          <label class="form-label">Fez exame de sangue?</label>
+          <select id="mar_exame" class="form-select" onchange="toggleExameVal()">
+            <option value="Não">Não</option>
+            <option value="Sim">Sim</option>
+          </select>
+        </div>
+        <div class="form-group" id="marExameValWrap" style="display:none">
+          <label class="form-label">Valor do Exame</label>
+          <input type="number" id="mar_exame_val" class="form-input" placeholder="0,00" step="0.01">
+        </div>
+        <div class="form-group w-auto" style="padding-top:20px">
+          <button class="btn btn-primary" onclick="saveMaristela()">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Consultas do Mês</div>
+      <div class="table-wrap"><table>
+        <tr><th>Data</th><th>Paciente</th><th>Pgto</th><th class="td-num">Consulta</th><th>Exame?</th><th class="td-num">Val. Exame</th><th></th></tr>
+        ${maristela.length ? maristela.map(r=>`<tr>
+          <td>${r.data}</td><td>${r.nome||''}</td><td>${badgePgto(r.pgto)}</td>
+          <td class="td-num">${fmtR(r.valor_consulta)}</td>
+          <td><span class="td-badge" style="background:${r.fez_exame==='Sim'?'rgba(201,168,76,0.15)':'rgba(255,255,255,0.05)'};color:${r.fez_exame==='Sim'?'var(--gold-light)':'var(--gray-400)'}">${r.fez_exame||'Não'}</span></td>
+          <td class="td-num">${r.fez_exame==='Sim'?fmtR(r.valor_exame):'—'}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="delMedica(${r.id})">✕</button></td>
+        </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);padding:20px">Nenhuma consulta</td></tr>'}
+      </table></div>
+    </div>
+  </div>`;
+}
+
+function switchTab(el, show, hide) {
+  document.getElementById(show).classList.remove('hidden');
+  document.getElementById(hide).classList.add('hidden');
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+function calcRepasseLeticia() {
+  const v = parseFloat(document.getElementById('let_valor')?.value)||0;
+  const med = v * CONFIG.SPLIT_LETICIA.medica;
+  const lab = v * CONFIG.SPLIT_LETICIA.lab;
+  document.getElementById('let_repasse_display').textContent = fmtR(med);
+  document.getElementById('let_lab_display').textContent = fmtR(lab);
+}
+function toggleExameVal() {
+  const v = document.getElementById('mar_exame')?.value;
+  document.getElementById('marExameValWrap').style.display = v==='Sim'?'flex':'none';
+}
+async function saveLeticia() {
+  const g = id => document.getElementById(id)?.value || '';
+  if (!g('let_nome')) { showToast('Informe o nome do paciente','err'); return; }
+  const val = parseFloat(g('let_valor'))||0;
+  const record = {
+    data: g('let_data'), competencia: g('let_data').substring(0,7),
+    medica: 'Leticia', nome: g('let_nome'), pgto: g('let_pgto'),
+    valor_total: val, repasse_medica: val*CONFIG.SPLIT_LETICIA.medica,
+    repasse_lab: val*CONFIG.SPLIT_LETICIA.lab, timestamp: new Date().toISOString()
+  };
+  showLoading('Salvando...'); await saveRecord('medicas', record); hideLoading();
+  showToast('Salvo!','ok'); showPage('medicas');
+}
+async function saveMaristela() {
+  const g = id => document.getElementById(id)?.value || '';
+  if (!g('mar_nome')) { showToast('Informe o nome do paciente','err'); return; }
+  const record = {
+    data: g('mar_data'), competencia: g('mar_data').substring(0,7),
+    medica: 'Maristela', nome: g('mar_nome'), pgto: g('mar_pgto'),
+    valor_consulta: parseFloat(g('mar_valor'))||0,
+    fez_exame: g('mar_exame'), valor_exame: parseFloat(g('mar_exame_val'))||0,
+    timestamp: new Date().toISOString()
+  };
+  showLoading('Salvando...'); await saveRecord('medicas', record); hideLoading();
+  showToast('Salvo!','ok'); showPage('medicas');
+}
+async function delMedica(id) {
+  if (!confirm('Remover?')) return;
+  await deleteRecord('medicas', id); showPage('medicas');
+}
+
+// ============================================================
+// PAGE: CONVÊNIOS
+// ============================================================
+function renderConvenios(m) {
+  const rows = filterByMonth(state.data.convenios, 'competencia', m);
+  return `
+  <div class="card">
+    <div class="card-title">Receitas de Convênio — ${monthLabel(m)}</div>
+    ${CONFIG.CONVENIOS.map(conv => {
+      const val = sumField(rows.filter(r=>r.convenio===conv),'valor');
+      return `
+      <div class="form-row" style="align-items:center;margin-bottom:10px">
+        <div style="flex:2;font-size:13px;color:${val>0?'var(--white)':'var(--gray-400)'}">${conv}</div>
+        <div class="form-group" style="max-width:200px">
+          <input type="number" id="conv_${conv.replace(/[\s-]/g,'_')}" class="form-input"
+            placeholder="0,00" step="0.01" value="${val||''}">
+        </div>
+      </div>`;
+    }).join('')}
+    <div class="divider"></div>
+    <div class="flex-between">
+      <div>
+        <div style="font-size:12px;color:var(--gray-400)">Total Convênios</div>
+        <div style="font-size:20px;font-weight:700;color:var(--gold-light)" id="convTotal">${fmtR(sumField(rows,'valor'))}</div>
+      </div>
+      <button class="btn btn-primary" onclick="saveConvenios('${m}')">💾 Salvar</button>
+    </div>
+  </div>`;
+}
+
+async function saveConvenios(m) {
+  // Remove existing for this month and re-save
+  state.data.convenios = (state.data.convenios||[]).filter(r=>r.competencia!==m);
+  for (const conv of CONFIG.CONVENIOS) {
+    const el = document.getElementById(`conv_${conv.replace(/[\s-]/g,'_')}`);
+    const val = parseFloat(el?.value)||0;
+    if (val > 0) {
+      await saveRecord('convenios', { competencia: m, convenio: conv, valor: val });
+    }
+  }
+  showToast('Convênios salvos!','ok'); showPage('convenios');
+}
+
+// ============================================================
+// PAGE: DESPESAS
+// ============================================================
+function renderDespesas(m) {
+  const rows = filterByMonth(state.data.despesas_mensais, 'competencia', m);
+  const getVal = cat => sumField(rows.filter(r=>r.categoria===cat),'valor') || '';
+  const allCats = [...CONFIG.CAT_FIXAS, ...CONFIG.CAT_VARIAVEIS];
+  return `
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'despFixas','despVar')">Fixas</div>
+    <div class="tab" onclick="switchTab(this,'despVar','despFixas')">Variáveis</div>
+  </div>
+  <div id="despFixas">
+    <div class="card">
+      <div class="card-title">Despesas Fixas — ${monthLabel(m)}</div>
+      ${CONFIG.CAT_FIXAS.map(cat=>`
+      <div class="form-row" style="margin-bottom:8px;align-items:center">
+        <div style="flex:2;font-size:13px;color:var(--white)">${cat}</div>
+        <div class="form-group" style="max-width:220px">
+          <input type="number" id="df_${cat.replace(/\s/g,'_')}" class="form-input"
+            placeholder="0,00" step="0.01" value="${getVal(cat)||''}">
+        </div>
+      </div>`).join('')}
+      <div class="divider"></div>
+      <div class="flex-between">
+        <div></div>
+        <button class="btn btn-primary" onclick="saveDespesas('${m}','fixas')">💾 Salvar Fixas</button>
+      </div>
+    </div>
+  </div>
+  <div id="despVar" class="hidden">
+    <div class="card">
+      <div class="card-title">Despesas Variáveis — ${monthLabel(m)}</div>
+      ${CONFIG.CAT_VARIAVEIS.map(cat=>`
+      <div class="form-row" style="margin-bottom:8px;align-items:center">
+        <div style="flex:2;font-size:13px;color:var(--white)">${cat}</div>
+        <div class="form-group" style="max-width:220px">
+          <input type="number" id="dv_${cat.replace(/[\s.]/g,'_')}" class="form-input"
+            placeholder="0,00" step="0.01" value="${getVal(cat)||''}">
+        </div>
+      </div>`).join('')}
+      <div class="divider"></div>
+      <div class="flex-between">
+        <div></div>
+        <button class="btn btn-primary" onclick="saveDespesas('${m}','variaveis')">💾 Salvar Variáveis</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function saveDespesas(m, tipo) {
+  const cats = tipo==='fixas' ? CONFIG.CAT_FIXAS : CONFIG.CAT_VARIAVEIS;
+  const prefix = tipo==='fixas'?'df_':'dv_';
+  state.data.despesas_mensais = (state.data.despesas_mensais||[]).filter(r=>!(r.competencia===m && cats.includes(r.categoria)));
+  for (const cat of cats) {
+    const el = document.getElementById(`${prefix}${cat.replace(/[\s.]/g,'_')}`);
+    const val = parseFloat(el?.value)||0;
+    if (val > 0) await saveRecord('despesas_mensais', { competencia: m, categoria: cat, tipo, valor: val });
+  }
+  showToast('Despesas salvas!','ok');
+}
+
+// ============================================================
+// PAGE: SALÁRIOS
+// ============================================================
+function renderSalarios(m) {
+  const rows = filterByMonth(state.data.salarios, 'competencia', m);
+  const funs = ['Beatriz','Isabelle','Viviane'];
+  const getF = (f, field) => {
+    const r = rows.find(x=>x.funcionaria===f);
+    return r ? (r[field]||'') : '';
+  };
+  const diasUteis = getDiasUteisNoMes(m);
+  return `
+  <div class="card">
+    <div class="card-title">Folha de Pagamento — ${monthLabel(m)}</div>
+    <div class="form-row" style="margin-bottom:16px;align-items:center">
+      <div class="form-group w-auto">
+        <label class="form-label">Dias Úteis no Mês</label>
+        <input type="number" id="sal_dias" class="form-input" value="${diasUteis}" style="max-width:100px" oninput="recalcVT()">
+      </div>
+      <div style="font-size:12px;color:var(--gray-400);padding-top:18px">Calculado automaticamente — edite se necessário</div>
+    </div>
+    <div class="table-wrap"><table>
+      <tr>
+        <th>Funcionária</th>
+        <th class="td-num">Salário</th>
+        <th class="td-num">Bônus</th>
+        <th class="td-num">VT (auto)</th>
+        <th class="td-num">Refeição</th>
+        <th class="td-num">Total</th>
+      </tr>
+      ${funs.map(f=>`
+      <tr>
+        <td style="font-weight:600">${f}</td>
+        <td><input type="number" id="sal_${f}_sal" class="form-input" style="max-width:120px" placeholder="0,00" step="0.01" value="${getF(f,'salario')}" oninput="calcSalTotal('${f}')"></td>
+        <td><input type="number" id="sal_${f}_bon" class="form-input" style="max-width:100px" placeholder="0,00" step="0.01" value="${getF(f,'bonus')}" oninput="calcSalTotal('${f}')"></td>
+        <td id="sal_${f}_vt_display" style="text-align:right;color:var(--gray-400)">${fmtR((CONFIG.PASSAGENS[f]||0)*diasUteis*2)}</td>
+        <td><input type="number" id="sal_${f}_ref" class="form-input" style="max-width:100px" placeholder="0,00" step="0.01" value="${getF(f,'refeicao')||1260}"></td>
+        <td id="sal_${f}_total" class="td-num text-gold" style="font-weight:700">—</td>
+      </tr>`).join('')}
+    </table></div>
+    <div class="divider"></div>
+    <div class="flex-between">
+      <div>
+        <div style="font-size:12px;color:var(--gray-400)">Total Folha</div>
+        <div style="font-size:20px;font-weight:700;color:var(--gold-light)" id="salTotalGeral">—</div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSalarios('${m}')">💾 Salvar Folha</button>
+    </div>
+  </div>`;
+}
+
+function calcDiasUteis() {
+  const m = state.currentMonth;
+  const funs = ['Beatriz','Isabelle','Viviane'];
+  funs.forEach(f => calcSalTotal(f));
+  recalcTotal();
+}
+
+function recalcVT() {
+  const dias = parseInt(document.getElementById('sal_dias')?.value)||0;
+  const funs = ['Beatriz','Isabelle','Viviane'];
+  funs.forEach(f => {
+    const vt = (CONFIG.PASSAGENS[f]||0) * dias * 2;
+    const el = document.getElementById(`sal_${f}_vt_display`);
+    if (el) el.textContent = fmtR(vt);
+    calcSalTotal(f);
+  });
+}
+
+function calcSalTotal(f) {
+  const g = id => parseFloat(document.getElementById(id)?.value||0)||0;
+  const dias = parseInt(document.getElementById('sal_dias')?.value)||0;
+  const sal = g(`sal_${f}_sal`), bon = g(`sal_${f}_bon`), ref = g(`sal_${f}_ref`);
+  const vt = (CONFIG.PASSAGENS[f]||0)*dias*2;
+  const total = sal+bon+vt+ref;
+  const el = document.getElementById(`sal_${f}_total`);
+  if (el) el.textContent = fmtR(total);
+  recalcTotal();
+}
+
+function recalcTotal() {
+  const funs = ['Beatriz','Isabelle','Viviane'];
+  let total = 0;
+  funs.forEach(f => {
+    const g = id => parseFloat(document.getElementById(id)?.value||0)||0;
+    const dias = parseInt(document.getElementById('sal_dias')?.value)||0;
+    total += g(`sal_${f}_sal`)+g(`sal_${f}_bon`)+(CONFIG.PASSAGENS[f]||0)*dias*2+g(`sal_${f}_ref`);
+  });
+  const el = document.getElementById('salTotalGeral');
+  if (el) el.textContent = fmtR(total);
+}
+
+async function saveSalarios(m) {
+  const funs = ['Beatriz','Isabelle','Viviane'];
+  const dias = parseInt(document.getElementById('sal_dias')?.value)||0;
+  state.data.salarios = (state.data.salarios||[]).filter(r=>r.competencia!==m);
+  for (const f of funs) {
+    const sal = parseFloat(document.getElementById(`sal_${f}_sal`)?.value)||0;
+    if (sal > 0) {
+      const bon = parseFloat(document.getElementById(`sal_${f}_bon`)?.value)||0;
+      const ref = parseFloat(document.getElementById(`sal_${f}_ref`)?.value)||0;
+      const vt = (CONFIG.PASSAGENS[f]||0)*dias*2;
+      await saveRecord('salarios', { competencia: m, funcionaria: f, salario: sal, bonus: bon, vt, refeicao: ref, dias_uteis: dias });
+    }
+  }
+  showToast('Folha salva!','ok');
+}
+
+// ============================================================
+// PAGE: HISTÓRICO
+// ============================================================
+function renderHistorico(m) {
+  const rows = filterByMonth(state.data.caixa, 'competencia', m).sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+  return `
+  <div class="card">
+    <div class="card-title">Caixas Lançados — ${monthLabel(m)}</div>
+    <div class="table-wrap"><table>
+      <tr>
+        <th>Data</th><th class="td-num">Dinheiro</th><th class="td-num">PIX</th>
+        <th class="td-num">Crédito</th><th class="td-num">Débito</th>
+        <th class="td-num">Total Sistêm.</th><th class="td-num">Diferença</th><th></th>
+      </tr>
+      ${rows.length ? rows.map(r=>{
+        const diff = parseFloat(r.diferenca)||0;
+        const absDiff = Math.abs(diff);
+        const diffColor = absDiff<0.05?'#4ade80':absDiff<=5?'#fbbf24':'#f87171';
+        return `<tr>
+          <td>${r.data}</td>
+          <td class="td-num">${fmtR(r.blocoA_dinheiro)}</td>
+          <td class="td-num">${fmtR(r.blocoA_pix)}</td>
+          <td class="td-num">${fmtR(r.blocoA_credito)}</td>
+          <td class="td-num">${fmtR(r.blocoA_debito)}</td>
+          <td class="td-num text-gold">${fmtR((parseFloat(r.blocoA_dinheiro)||0)+(parseFloat(r.blocoA_pix)||0)+(parseFloat(r.blocoA_credito)||0)+(parseFloat(r.blocoA_debito)||0))}</td>
+          <td class="td-num" style="color:${diffColor}">${fmtR(diff)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="delCaixa(${r.id})">✕</button></td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:20px">Nenhum caixa lançado este mês</td></tr>'}
+    </table></div>
+  </div>`;
+}
+async function delCaixa(id) {
+  if (!confirm('Remover este lançamento?')) return;
+  await deleteRecord('caixa', id); showPage('historico');
+}
+
+// ============================================================
+// PAGE: DIVERGÊNCIAS
+// ============================================================
+function renderDivergencias(m) {
+  const rows = (state.data.caixa||[])
+    .filter(r => Math.abs(parseFloat(r.diferenca)||0) > 0.05)
+    .sort((a,b)=>b.data.localeCompare(a.data));
+  return `
+  <div class="card">
+    <div class="card-title">Histórico de Divergências</div>
+    ${rows.length ? '' : '<div class="alert alert-ok">✅ Nenhuma divergência registrada!</div>'}
+    <div class="table-wrap"><table>
+      <tr><th>Data</th><th class="td-num">Diferença</th><th>Justificativa</th></tr>
+      ${rows.map(r=>{
+        const diff = parseFloat(r.diferenca)||0;
+        return `<tr>
+          <td>${r.data}</td>
+          <td class="td-num" style="color:${Math.abs(diff)<=5?'#fbbf24':'#f87171'}">${fmtR(diff)}</td>
+          <td style="color:var(--gray-400)">${r.justificativa||'—'}</td>
+        </tr>`;
+      }).join('')}
+    </table></div>
+  </div>`;
+}
+
+// ============================================================
+// START
+// ============================================================
+document.getElementById('loginInput').focus();
+</script>
+</body>
+</html>
