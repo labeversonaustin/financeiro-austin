@@ -1789,7 +1789,7 @@ function renderDespesas(m) {
       <div class="card-title">Despesas Fixas — ${monthLabel(m)}</div>
       ${CONFIG.CAT_FIXAS.map(cat=>`
       <div class="form-row" style="margin-bottom:8px;align-items:center">
-        <div style="flex:2;font-size:13px;color:var(--white)">${cat}</div>
+        <div style="flex:2;font-size:13px;color:var(--text-main)">${cat}</div>
         <div class="form-group" style="max-width:220px">
           <input type="number" id="df_${cat.replace(/\s/g,'_')}" class="form-input"
             placeholder="0,00" step="0.01" value="${getVal(cat)||''}">
@@ -1807,7 +1807,7 @@ function renderDespesas(m) {
       <div class="card-title">Despesas Variáveis — ${monthLabel(m)}</div>
       ${CONFIG.CAT_VARIAVEIS.map(cat=>`
       <div class="form-row" style="margin-bottom:8px;align-items:center">
-        <div style="flex:2;font-size:13px;color:var(--white)">${cat}</div>
+        <div style="flex:2;font-size:13px;color:var(--text-main)">${cat}</div>
         <div class="form-group" style="max-width:220px">
           <input type="number" id="dv_${cat.replace(/[\s.]/g,'_')}" class="form-input"
             placeholder="0,00" step="0.01" value="${getVal(cat)||''}">
@@ -1839,7 +1839,7 @@ async function saveDespesas(m, tipo) {
 // ============================================================
 function renderSalarios(m) {
   const rows = filterByMonth(state.data.salarios, 'competencia', m);
-  const funs = ['Beatriz','Isabelle','Viviane'];
+  const funs = ['Beatriz','Isabelle','Viviane','Rita'];
   const getF = (f, field) => {
     const r = rows.find(x=>x.funcionaria===f);
     return r ? (r[field]||'') : '';
@@ -1887,14 +1887,14 @@ function renderSalarios(m) {
 
 function calcDiasUteis() {
   const m = state.currentMonth;
-  const funs = ['Beatriz','Isabelle','Viviane'];
+  const funs = ['Beatriz','Isabelle','Viviane','Rita'];
   funs.forEach(f => calcSalTotal(f));
   recalcTotal();
 }
 
 function recalcVT() {
   const dias = parseInt(document.getElementById('sal_dias')?.value)||0;
-  const funs = ['Beatriz','Isabelle','Viviane'];
+  const funs = ['Beatriz','Isabelle','Viviane','Rita'];
   funs.forEach(f => {
     const vt = (CONFIG.PASSAGENS[f]||0) * dias * 2;
     const el = document.getElementById(`sal_${f}_vt_display`);
@@ -1915,7 +1915,7 @@ function calcSalTotal(f) {
 }
 
 function recalcTotal() {
-  const funs = ['Beatriz','Isabelle','Viviane'];
+  const funs = ['Beatriz','Isabelle','Viviane','Rita'];
   let total = 0;
   funs.forEach(f => {
     const g = id => parseFloat(document.getElementById(id)?.value||0)||0;
@@ -1927,7 +1927,7 @@ function recalcTotal() {
 }
 
 async function saveSalarios(m) {
-  const funs = ['Beatriz','Isabelle','Viviane'];
+  const funs = ['Beatriz','Isabelle','Viviane','Rita'];
   const dias = parseInt(document.getElementById('sal_dias')?.value)||0;
   state.data.salarios = (state.data.salarios||[]).filter(r=>r.competencia!==m);
   for (const f of funs) {
