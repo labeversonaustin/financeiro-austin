@@ -1741,7 +1741,7 @@ function renderConvenios(m) {
       const val = sumField(rows.filter(r=>r.convenio===conv),'valor');
       return `
       <div class="form-row" style="align-items:center;margin-bottom:10px">
-        <div style="flex:2;font-size:13px;color:${val>0?'var(--white)':'var(--gray-400)'}">${conv}</div>
+        <div style="flex:2;font-size:13px;color:var(--text-main)">${conv}</div>
         <div class="form-group" style="max-width:200px">
           <input type="number" id="conv_${conv.replace(/[\s-]/g,'_')}" class="form-input"
             placeholder="0,00" step="0.01" value="${val||''}">
