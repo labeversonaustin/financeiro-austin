@@ -572,7 +572,7 @@ const CONFIG = {
   PASSAGENS: { 'Beatriz': 12, 'Isabelle': 19, 'Viviane': 12, 'Rita': 11 },
   CONVENIOS: ['UNIMED', 'POSTAL SAÚDE', 'BRADESCO SAÚDE', 'APPAI', 'CAC-CEDAE', 'CAPE SAÚDE', 'SAÚDE CAIXA'],
   CAT_FIXAS: ['Aluguel','Luz','Internet','Encargos salariais','Sindicato','Simples Nacional','Taxas prefeitura','Coleta seletiva','Monitoramento','Uber'],
-  CAT_VARIAVEIS: ['Repasse ECG','Repasse Dra. Victória','Repasse Dr. Fabiano','Convênio Everson','Contraprova - Boleto','Contraprova - Desc. na fonte','Diferença DB/Pardini','Variados'],
+  CAT_VARIAVEIS: ['Repasse ECG','Repasse Dra. Victória','Repasse Dr. Fabiano','Convênio Everson','Contraprova - Boleto','Contraprova - Desc. na fonte','Laboratório de Apoio - DB','Laboratório de Apoio - Pardini','Variados'],
 };
 
 // ============================================================
@@ -899,70 +899,136 @@ function showToast(msg, type='ok') {
 // ============================================================
 // PAGE: DRE
 // ============================================================
-function renderDRE(m) {
+function renderDRESimplified(m) {
   const caixa = filterByMonth(state.data.caixa, 'competencia', m);
   const medicas = filterByMonth(state.data.medicas, 'competencia', m);
   const conv = filterByMonth(state.data.convenios, 'competencia', m);
   const desp = filterByMonth(state.data.despesas_mensais, 'competencia', m);
   const sal = filterByMonth(state.data.salarios, 'competencia', m);
 
-  // Receitas
-  const labDin = sumField(caixa, 'blocoA_dinheiro');
-  const labPix = sumField(caixa, 'blocoA_pix');
-  const labCre = sumField(caixa, 'blocoA_credito');
-  const labDeb = sumField(caixa, 'blocoA_debito');
-  const labTotal = labDin + labPix + labCre + labDeb;
-
-  // Consultório — vem das consultas da Maristela
-  const maristela = medicas.filter(r => r.medica === 'Maristela');
-  const consDin = sumField(maristela.filter(r=>r.pgto==='Dinheiro'), 'valor_consulta');
-  const consPix = sumField(maristela.filter(r=>r.pgto==='PIX'), 'valor_consulta');
-  const consCre = sumField(maristela.filter(r=>r.pgto==='Crédito'||r.pgto==='Cartão de crédito'), 'valor_consulta');
-  const consDeb = sumField(maristela.filter(r=>r.pgto==='Débito'||r.pgto==='Cartão de débito'), 'valor_consulta');
-  const consTotal = consDin + consPix + consCre + consDeb;
-
-  // Convênios
-  const convUni = sumField(conv.filter(r=>r.convenio==='UNIMED'), 'valor');
-  const convPos = sumField(conv.filter(r=>r.convenio==='POSTAL SAÚDE'), 'valor');
-  const convBra = sumField(conv.filter(r=>r.convenio==='BRADESCO SAÚDE'), 'valor');
-  const convApp = sumField(conv.filter(r=>r.convenio==='APPAI'), 'valor');
-  const convCac = sumField(conv.filter(r=>r.convenio==='CAC-CEDAE'), 'valor');
-  const convCap = sumField(conv.filter(r=>r.convenio==='CAPE SAÚDE'), 'valor');
-  const convSau = sumField(conv.filter(r=>r.convenio==='SAÚDE CAIXA'), 'valor');
-  const convTotal = convUni+convPos+convBra+convApp+convCac+convCap+convSau;
-
+  const labTotal = sumField(caixa,'blocoA_dinheiro')+sumField(caixa,'blocoA_pix')+sumField(caixa,'blocoA_credito')+sumField(caixa,'blocoA_debito');
+  const maristela = medicas.filter(r=>r.medica==='Maristela');
+  const consTotal = sumField(maristela,'valor_consulta');
+  const convTotal = sumField(conv,'valor');
   const totalReceitas = labTotal + consTotal + convTotal;
 
-  // Despesas fixas
-  const getDesp = (cat) => sumField(desp.filter(r=>r.categoria===cat), 'valor');
-  const folha = sumField(sal, 'salario') + sumField(sal,'bonus');
-  const vt = sumField(sal, 'vt');
-  const almoco = sumField(filterByMonth(state.data.almoco,'competencia',m), 'total');
-  const aluguel = getDesp('Aluguel'), luz = getDesp('Luz'), internet = getDesp('Internet');
-  const encargos = getDesp('Encargos salariais'), sindicato = getDesp('Sindicato');
-  const simples = getDesp('Simples Nacional'), taxas = getDesp('Taxas prefeitura');
-  const coleta = getDesp('Coleta seletiva'), monit = getDesp('Monitoramento');
-  const uber = getDesp('Uber');
+  const getDesp = (cat) => sumField(desp.filter(r=>r.categoria===cat),'valor');
+  const folha = sumField(sal,'salario')+sumField(sal,'bonus');
+  const vt = sumField(sal,'vt');
+  const almoco = sumField(filterByMonth(state.data.almoco,'competencia',m),'total');
+  const aluguel=getDesp('Aluguel'),luz=getDesp('Luz'),internet=getDesp('Internet'),encargos=getDesp('Encargos salariais'),sindicato=getDesp('Sindicato'),simples=getDesp('Simples Nacional'),taxas=getDesp('Taxas prefeitura'),coleta=getDesp('Coleta seletiva'),monit=getDesp('Monitoramento'),uber=getDesp('Uber');
   const totalFixas = aluguel+luz+internet+folha+vt+almoco+encargos+sindicato+simples+uber+taxas+coleta+monit;
-
-  // Despesas variáveis
-  const repEcg = getDesp('Repasse ECG');
-  const repLeticia = sumField(medicas.filter(r=>r.medica==='Leticia'), 'repasse_medica');
-  const repVictoria = getDesp('Repasse Dra. Victória');
-  const repFabiano = getDesp('Repasse Dr. Fabiano');
-  const repMaristela = CONFIG.PLANTAO_MARISTELA;
-  const convEv = getDesp('Convênio Everson');
-  const ctraprova = getDesp('Contraprova - Boleto');
-  const ctradesc = getDesp('Contraprova - Desc. na fonte');
-  const difPardini = getDesp('Diferença DB/Pardini');
-  const variados = getDesp('Variados');
-  const totalVariaveis = repEcg+repLeticia+repVictoria+repFabiano+repMaristela+convEv+ctraprova+ctradesc+difPardini+variados;
-
+  const repEcg=getDesp('Repasse ECG'), repLeticia=sumField(medicas.filter(r=>r.medica==='Leticia'),'repasse_medica'), repVictoria=getDesp('Repasse Dra. Victória'), repFabiano=getDesp('Repasse Dr. Fabiano'), repMaristela=CONFIG.PLANTAO_MARISTELA, convEv=getDesp('Convênio Everson'), ctraprova=getDesp('Contraprova - Boleto'), ctradesc=getDesp('Contraprova - Desc. na fonte'), labDB=getDesp('Laboratório de Apoio - DB'), labPardini=getDesp('Laboratório de Apoio - Pardini'), variados=getDesp('Variados');
+  const totalVariaveis = repEcg+repLeticia+repVictoria+repFabiano+repMaristela+convEv+ctraprova+ctradesc+labDB+labPardini+variados;
   const totalDespesas = totalFixas + totalVariaveis;
   const margem = totalReceitas - totalDespesas;
   const margPct = totalReceitas > 0 ? (margem/totalReceitas*100).toFixed(1) : '0.0';
-  const margClass = margem >= 0 ? 'green' : 'red';
 
+  return `
+  <div class="grid-4 mb-16">
+    <div class="stat-card">
+      <div class="stat-label">Total Receitas</div>
+      <div class="stat-value" style="color:var(--navy)">${fmtR(totalReceitas)}</div>
+      <div class="stat-sub">${monthLabel(m)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Despesas</div>
+      <div class="stat-value" style="color:var(--red)">${fmtR(totalDespesas)}</div>
+      <div class="stat-sub">Fixas + Variáveis</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Margem Final</div>
+      <div class="stat-value" style="color:${margem>=0?'var(--green)':'var(--red)'}">${fmtR(margem)}</div>
+      <div class="stat-sub">${margPct}% da receita</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Dias com Caixa</div>
+      <div class="stat-value">${caixa.length}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Demonstrativo de Resultado</div>
+    <div class="table-wrap"><table>
+      <tr class="dre-section-header"><td colspan="2">RECEITAS</td></tr>
+      <tr class="dre-sub"><td>Total Receitas</td><td class="td-num" style="color:var(--green);font-weight:700">${fmtR(totalReceitas)}</td></tr>
+
+      <tr class="dre-section-header"><td colspan="2">DESPESAS FIXAS</td></tr>
+      <tr class="dre-sub"><td>Aluguel</td><td class="td-num">${fmtR(aluguel)}</td></tr>
+      <tr class="dre-sub"><td>Luz</td><td class="td-num">${fmtR(luz)}</td></tr>
+      <tr class="dre-sub"><td>Internet</td><td class="td-num">${fmtR(internet)}</td></tr>
+      <tr class="dre-sub"><td>Folha de pagamento</td><td class="td-num">${fmtR(folha)}</td></tr>
+      <tr class="dre-sub"><td>Vale Transporte</td><td class="td-num">${fmtR(vt)}</td></tr>
+      <tr class="dre-sub"><td>Almoço</td><td class="td-num">${fmtR(almoco)}</td></tr>
+      <tr class="dre-sub"><td>Encargos salariais</td><td class="td-num">${fmtR(encargos)}</td></tr>
+      <tr class="dre-sub"><td>Sindicato</td><td class="td-num">${fmtR(sindicato)}</td></tr>
+      <tr class="dre-sub"><td>Simples Nacional</td><td class="td-num">${fmtR(simples)}</td></tr>
+      <tr class="dre-sub"><td>Uber</td><td class="td-num">${fmtR(uber)}</td></tr>
+      <tr class="dre-sub"><td>Taxas prefeitura</td><td class="td-num">${fmtR(taxas)}</td></tr>
+      <tr class="dre-sub"><td>Coleta seletiva</td><td class="td-num">${fmtR(coleta)}</td></tr>
+      <tr class="dre-sub"><td>Monitoramento</td><td class="td-num">${fmtR(monit)}</td></tr>
+      <tr class="dre-total"><td>TOTAL FIXAS</td><td class="td-num" style="color:var(--red)">${fmtR(totalFixas)}</td></tr>
+
+      <tr class="dre-section-header"><td colspan="2">DESPESAS VARIÁVEIS</td></tr>
+      <tr class="dre-sub"><td>Repasse ECG</td><td class="td-num">${fmtR(repEcg)}</td></tr>
+      <tr class="dre-sub"><td>Repasse Dra. Leticia</td><td class="td-num">${fmtR(repLeticia)}</td></tr>
+      <tr class="dre-sub"><td>Repasse Dra. Victória</td><td class="td-num">${fmtR(repVictoria)}</td></tr>
+      <tr class="dre-sub"><td>Repasse Dr. Fabiano</td><td class="td-num">${fmtR(repFabiano)}</td></tr>
+      <tr class="dre-sub"><td>Plantão Dra. Maristela</td><td class="td-num">${fmtR(repMaristela)}</td></tr>
+      <tr class="dre-sub"><td>Convênio Everson</td><td class="td-num">${fmtR(convEv)}</td></tr>
+      <tr class="dre-sub"><td>Contraprova - Boleto</td><td class="td-num">${fmtR(ctraprova)}</td></tr>
+      <tr class="dre-sub"><td>Contraprova - Desc. na fonte</td><td class="td-num">${fmtR(ctradesc)}</td></tr>
+      <tr class="dre-sub"><td>Laboratório de Apoio - DB</td><td class="td-num">${fmtR(labDB)}</td></tr>
+      <tr class="dre-sub"><td>Laboratório de Apoio - Pardini</td><td class="td-num">${fmtR(labPardini)}</td></tr>
+      <tr class="dre-sub"><td>Variados</td><td class="td-num">${fmtR(variados)}</td></tr>
+      <tr class="dre-total"><td>TOTAL VARIÁVEIS</td><td class="td-num" style="color:var(--red)">${fmtR(totalVariaveis)}</td></tr>
+      <tr class="dre-total"><td>TOTAL DESPESAS</td><td class="td-num" style="color:var(--red)">${fmtR(totalDespesas)}</td></tr>
+      <tr class="dre-margin">
+        <td>MARGEM FINAL</td>
+        <td class="td-num" style="color:${margem>=0?'var(--green)':'var(--red)'}">${fmtR(margem)}</td>
+      </tr>
+    </table></div>
+  </div>`;
+}
+
+
+function renderDRE(m) {
+  const simplified = window._dreSimplified || false;
+  return `
+  <div style="display:flex;gap:8px;margin-bottom:20px">
+    <button class="btn ${simplified?'btn-secondary':'btn-primary'} btn-sm" onclick="setDREMode(false)">☰ Detalhado</button>
+    <button class="btn ${simplified?'btn-primary':'btn-secondary'} btn-sm" onclick="setDREMode(true)">⊟ Simplificado</button>
+  </div>
+  ${simplified ? renderDRESimplified('' + m + '') : renderDREDetalhado('' + m + '')}
+  `;
+}
+
+function setDREMode(simplified) {
+  window._dreSimplified = simplified;
+  showPage('dre');
+}
+
+
+function renderDREDetalhado(m) {
+  const caixa = filterByMonth(state.data.caixa, 'competencia', m);
+  const medicas = filterByMonth(state.data.medicas, 'competencia', m);
+  const conv = filterByMonth(state.data.convenios, 'competencia', m);
+  const desp = filterByMonth(state.data.despesas_mensais, 'competencia', m);
+  const sal = filterByMonth(state.data.salarios, 'competencia', m);
+  const labDin = sumField(caixa,'blocoA_dinheiro'), labPix = sumField(caixa,'blocoA_pix'), labCre = sumField(caixa,'blocoA_credito'), labDeb = sumField(caixa,'blocoA_debito');
+  const labTotal = labDin+labPix+labCre+labDeb;
+  const maristela = medicas.filter(r=>r.medica==='Maristela');
+  const consDin=sumField(maristela.filter(r=>r.pgto==='Dinheiro'),'valor_consulta'), consPix=sumField(maristela.filter(r=>r.pgto==='PIX'),'valor_consulta'), consCre=sumField(maristela.filter(r=>r.pgto==='Crédito'||r.pgto==='Cartão de crédito'),'valor_consulta'), consDeb=sumField(maristela.filter(r=>r.pgto==='Débito'||r.pgto==='Cartão de débito'),'valor_consulta');
+  const consTotal=consDin+consPix+consCre+consDeb;
+  const convUni=sumField(conv.filter(r=>r.convenio==='UNIMED'),'valor'), convPos=sumField(conv.filter(r=>r.convenio==='POSTAL SAÚDE'),'valor'), convBra=sumField(conv.filter(r=>r.convenio==='BRADESCO SAÚDE'),'valor'), convApp=sumField(conv.filter(r=>r.convenio==='APPAI'),'valor'), convCac=sumField(conv.filter(r=>r.convenio==='CAC-CEDAE'),'valor'), convCap=sumField(conv.filter(r=>r.convenio==='CAPE SAÚDE'),'valor'), convSau=sumField(conv.filter(r=>r.convenio==='SAÚDE CAIXA'),'valor');
+  const convTotal=convUni+convPos+convBra+convApp+convCac+convCap+convSau;
+  const totalReceitas=labTotal+consTotal+convTotal;
+  const getDesp=(cat)=>sumField(desp.filter(r=>r.categoria===cat),'valor');
+  const folha=sumField(sal,'salario')+sumField(sal,'bonus'), vt=sumField(sal,'vt'), almoco=sumField(filterByMonth(state.data.almoco,'competencia',m),'total');
+  const aluguel=getDesp('Aluguel'),luz=getDesp('Luz'),internet=getDesp('Internet'),encargos=getDesp('Encargos salariais'),sindicato=getDesp('Sindicato'),simples=getDesp('Simples Nacional'),taxas=getDesp('Taxas prefeitura'),coleta=getDesp('Coleta seletiva'),monit=getDesp('Monitoramento'),uber=getDesp('Uber');
+  const totalFixas=aluguel+luz+internet+folha+vt+almoco+encargos+sindicato+simples+uber+taxas+coleta+monit;
+  const repEcg=getDesp('Repasse ECG'), repLeticia=sumField(medicas.filter(r=>r.medica==='Leticia'),'repasse_medica'), repVictoria=getDesp('Repasse Dra. Victória'), repFabiano=getDesp('Repasse Dr. Fabiano'), repMaristela=CONFIG.PLANTAO_MARISTELA, convEv=getDesp('Convênio Everson'), ctraprova=getDesp('Contraprova - Boleto'), ctradesc=getDesp('Contraprova - Desc. na fonte'), labDB=getDesp('Laboratório de Apoio - DB'), labPardini=getDesp('Laboratório de Apoio - Pardini'), variados=getDesp('Variados');
+  const totalVariaveis=repEcg+repLeticia+repVictoria+repFabiano+repMaristela+convEv+ctraprova+ctradesc+labDB+labPardini+variados;
+  const totalDespesas=totalFixas+totalVariaveis, margem=totalReceitas-totalDespesas, margPct=totalReceitas>0?(margem/totalReceitas*100).toFixed(1):'0.0', margClass=margem>=0?'green':'red';
   return `
   <div class="grid-4 mb-16">
     <div class="stat-card">
@@ -1041,7 +1107,8 @@ function renderDRE(m) {
       <tr class="dre-sub"><td>Convênio Everson</td><td class="td-num">${fmtR(convEv)}</td></tr>
       <tr class="dre-sub"><td>Contraprova - Boleto</td><td class="td-num">${fmtR(ctraprova)}</td></tr>
       <tr class="dre-sub"><td>Contraprova - Desc. na fonte</td><td class="td-num">${fmtR(ctradesc)}</td></tr>
-      <tr class="dre-sub"><td>Diferença DB/Pardini</td><td class="td-num">${fmtR(difPardini)}</td></tr>
+      <tr class="dre-sub"><td>Laboratório de Apoio - DB</td><td class="td-num">${fmtR(labDB)}</td></tr>
+      <tr class="dre-sub"><td>Laboratório de Apoio - Pardini</td><td class="td-num">${fmtR(labPardini)}</td></tr>
       <tr class="dre-sub"><td>Variados</td><td class="td-num">${fmtR(variados)}</td></tr>
       <tr class="dre-total"><td>TOTAL VARIÁVEIS</td><td class="td-num" style="color:#f87171">${fmtR(totalVariaveis)}</td></tr>
 
